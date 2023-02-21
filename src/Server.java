@@ -1,6 +1,5 @@
 import javax.net.ServerSocketFactory;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
+import javax.net.ssl.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,7 +31,7 @@ public class Server
         String keyStorePath = "C:\\Users\\Vinnie\\Documents\\simpleserver\\serverkeystore"; //TODO change on server
         char[] keystorePassword = null;
         char[] keyPassword = null;
-        try
+        try // get passwords to keystore for server from file
         {
             File info = new File("C:\\Users\\Vinnie\\Documents\\simpleserver\\passwords.txt");
             BufferedReader reader = new BufferedReader(new FileReader(info));
@@ -56,10 +55,21 @@ public class Server
         {
             keystore = KeyStore.getInstance("pkcs12");
             keystore.load(new FileInputStream(keyStorePath), keystorePassword);
-            KeyManagerFactory keyfact = KeyManagerFactory.getInstance("pkcs12");
+            KeyManagerFactory keyfact = KeyManagerFactory.getInstance("PKIX");
             keyfact.init(keystore, keyPassword);
             SSLContext context = SSLContext.getInstance(protocols[0]);
             context.init(keyfact.getKeyManagers(), null, null); //TODO add trust manager
+            SSLServerSocketFactory ssf = context.getServerSocketFactory();
+            SSLServerSocket s   = (SSLServerSocket) ssf.createServerSocket(PORT);
+            while(running) //main loop to accept new clients and start threads
+            {
+                SSLSocket client = (SSLSocket) s.accept();
+                serverThead st = new serverThead(client);
+                Thread t = new Thread(st);
+                t.start();
+
+
+            }
 
 
         }
@@ -67,11 +77,6 @@ public class Server
         {
             System.out.println("Problem with keystore");
             e.printStackTrace();
-        }
-        while(running)
-        {
-            ServerSocketFactory factory = ServerSocketFactory.getDefault();
-
         }
 
         return status;
