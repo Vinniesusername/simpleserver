@@ -3,14 +3,14 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
-public class serverThead implements Runnable
+public class ServerThread implements Runnable
 {
     SSLSocket client;
     PrintWriter out;
     BufferedReader in;
     boolean listen = true;
 
-    public serverThead (SSLSocket socket)
+    public ServerThread(SSLSocket socket)
     {
         this.client = socket;
     }
@@ -23,6 +23,7 @@ public class serverThead implements Runnable
         try
         {
             in = new BufferedReader(new InputStreamReader(this.client.getInputStream()));
+            System.out.println(in);
             System.out.println(this.client.getInputStream().toString());
             out = new PrintWriter(this.client.getOutputStream());
         }
@@ -34,14 +35,13 @@ public class serverThead implements Runnable
 
         while(true) //main client loop
         {
+            out.println("TEST SERVER");
+            out.flush();
+            String q = null;
             try
             {
-                String q = null;
-                while(in.ready())
-                {
-                    q = in.readLine(); //if more than one query is sent at a time we will only care about the last one
-
-                }
+                System.out.println("Theres data!#!!#");
+                q = in.readLine(); //if more than one query is sent at a time we will only care about the last one
 
                 if(q != null)
                 {
@@ -51,13 +51,12 @@ public class serverThead implements Runnable
                     out.println(response);
                 }
 
-
-
             }
             catch (Exception e)
             {
                 e.printStackTrace();
             }
+
 
         }
 

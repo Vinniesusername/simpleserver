@@ -1,20 +1,15 @@
-import javax.net.ServerSocketFactory;
 import javax.net.ssl.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
-import java.net.ServerSocket;
 import java.security.KeyStore;
 
 public class Server
 {
-
-    private static final String HOST = "localhost"; //change this to server ip if running one
     private static final int PORT = 4422; // TODO: register port
     private static final String[] protocols = new String[]{"TLSv1.3"};
     private static final String[] ciphers = new String[]{"TLS_AES_256_GCM_SHA384", "TLS_AES_128_GCM_SHA256"};
-
 
 
     public static void main(String[] args)
@@ -22,7 +17,6 @@ public class Server
         int status = openServer();
 
     }
-
 
     public static int openServer() //starts server listening for clients. returns status code.
     {
@@ -64,19 +58,16 @@ public class Server
             while(running) //main loop to accept new clients and start threads
             {
                 SSLSocket client = (SSLSocket) s.accept();
-                serverThead st = new serverThead(client);
+                ServerThread st = new ServerThread(client);
                 Thread t = new Thread(st);
                 t.start();
-
-
             }
-
-
         }
         catch (Exception e)
         {
             System.out.println("Problem with keystore");
             e.printStackTrace();
+            status = -1;
         }
 
         return status;
