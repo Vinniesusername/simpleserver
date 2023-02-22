@@ -22,7 +22,7 @@ public class Server
     {
         int status = 0;
         boolean running = true;
-        String keyStorePath = "C:\\Users\\Vinnie\\Documents\\simpleserver\\serverkeystore"; //TODO change on server
+        String keyStorePath =  "D:\\SPS\\keystore\\SPSServer"; //TODO change on server
         char[] keystorePassword = null;
         char[] keyPassword = null;
         try // get passwords to keystore for server from file
@@ -47,11 +47,16 @@ public class Server
         KeyStore keystore;
         try
         {
+            //key manager
             keystore = KeyStore.getInstance("pkcs12");
             keystore.load(new FileInputStream(keyStorePath), keystorePassword);
             KeyManagerFactory keyfact = KeyManagerFactory.getInstance("PKIX");
             keyfact.init(keystore, keyPassword);
+            //trust manager
+            TrustManagerFactory trstfact = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            
             SSLContext context = SSLContext.getInstance(protocols[0]);
+
             context.init(keyfact.getKeyManagers(), null, null); //TODO add trust manager
             SSLServerSocketFactory ssf = context.getServerSocketFactory();
             SSLServerSocket s   = (SSLServerSocket) ssf.createServerSocket(PORT);
