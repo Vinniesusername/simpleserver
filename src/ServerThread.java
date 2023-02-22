@@ -1,5 +1,6 @@
 import javax.net.ssl.SSLSocket;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
@@ -35,16 +36,14 @@ public class ServerThread implements Runnable
 
         while(true) //main client loop
         {
-            out.println("TEST SERVER");
-            out.flush();
             String q = null;
             try
             {
-                System.out.println("Theres data!#!!#");
                 q = in.readLine(); //if more than one query is sent at a time we will only care about the last one
 
                 if(q != null)
                 {
+                    System.out.println("data found");
                     System.out.println(q);
                     String response = dealWith(q);
                     System.out.println(response);
@@ -55,6 +54,9 @@ public class ServerThread implements Runnable
             catch (Exception e)
             {
                 e.printStackTrace();
+                disconnect();
+                break;
+
             }
 
 
@@ -84,6 +86,22 @@ public class ServerThread implements Runnable
 
         }
         return response;
+
+    }
+
+    public int disconnect()
+    {
+        int s = 0;
+        try
+        {
+            this.client.close();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            s = -1;
+        }
+        return s;
 
     }
 
