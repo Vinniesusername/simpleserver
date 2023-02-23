@@ -18,7 +18,6 @@ public class ServerThread implements Runnable
     @Override
     public void run()
     {
-        System.out.println("connection made");
 
         try
         {
@@ -34,18 +33,20 @@ public class ServerThread implements Runnable
 
         while(true) //main client loop
         {
-            String q = null;
+            String q = "";
             try
             {
-                q = in.readLine(); //if more than one query is sent at a time we will only care about the last one
+                q = in.readLine();
 
-                if(q != null)
+                if(q != null && !q.equals("")) //short circuit to avoid equals running on null string
                 {
-                    System.out.println("data found");
+                    System.out.println("data sent from client");
                     System.out.println(q);
                     String response = dealWith(q);
+                    System.out.println("data sent to client");
                     System.out.println(response);
                     out.println(response);
+                    out.flush();
                 }
             }
             catch (Exception e)
@@ -53,26 +54,27 @@ public class ServerThread implements Runnable
                 e.printStackTrace();
                 break;
             }
+
         }
     }
-    public String dealWith(String query) // 0 = request denied, -1 = null query, -2 idk what you want, positive int = it did what you asked.
+    public String dealWith(String query) // returns a response to the client query
     {
         String response = "";
-        //queries are expected to be in the format type;data0;data1,optional
+        //queries are expected to be in the format type;requestID;data0;data1,optional
         int respond = -2;
         if(query == null)
         {
             respond = -1;
             return null;
         }
-        String[] options = query.split(";", 4);
+        String[] options = query.split(";", 5);
         int type = Integer.parseInt(options[0]);
-        switch (type)
-        {
-            case 0: //ask for server for magic number
-                    respond = 1;
-                    response += "0;97;null;" + respond;
-                    break;
+        int requestID = Integer.parseInt(options[1]);
+        switch (type) {
+            case 0 -> //connection established
+                    response += "0;" + String.valueOf(requestID) + ";null;null";
+            case 1 -> //ask for magic number
+                    response += "1;" + String.valueOf(requestID) +";87;null";
         }
         return response;
     }

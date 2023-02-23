@@ -61,26 +61,20 @@ public class Server
             //trust manager
             TrustManagerFactory trstfact = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             trstfact.init(keystore);
-            
-            SSLContext context = SSLContext.getInstance(protocols[0]);
 
+            //context setup
+            SSLContext context = SSLContext.getInstance(protocols[0]);
             context.init(keyfact.getKeyManagers(), trstfact.getTrustManagers(), null);
+
+            //socket set up
             SSLServerSocketFactory ssf = context.getServerSocketFactory();
             SSLServerSocket s   = (SSLServerSocket) ssf.createServerSocket(PORT);
+
             while(running) //main loop to accept new clients and start threads
             {
                 SSLSocket client = (SSLSocket) s.accept();
-                //client.setEnabledProtocols(protocols);
-                //client.setEnabledCipherSuites(ciphers);
-
-                //test code to view enabled configs remove later
-                String[] temp = client.getEnabledCipherSuites();
-                String[] temp2 = client.getEnabledProtocols();
-                for(int i =0; i < temp.length; i++)
-                    System.out.println(temp[i]);
-                for(int i =0; i < temp2.length; i++)
-                    System.out.println(temp2[i]);
-                // end test code
+                client.setEnabledProtocols(protocols);
+                client.setEnabledCipherSuites(ciphers);
 
                 ServerThread st = new ServerThread(client);
                 Thread t = new Thread(st);
