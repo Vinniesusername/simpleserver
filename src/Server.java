@@ -22,9 +22,10 @@ public class Server
     {
         int status = 0;
         boolean running = true;
-        String keyStorePath =  "D:\\SPS\\keystore\\SPSServer"; //TODO change on server
+        String keyStorePath =  "D:\\SPS\\keystore\\spsclient"; //TODO change on server
         char[] keystorePassword = null;
         char[] keyPassword = null;
+        /*
         try // get passwords to keystore for server from file
         {
             File info = new File("C:\\Users\\Vinnie\\Documents\\simpleserver\\passwords.txt");
@@ -35,8 +36,8 @@ public class Server
                 passwords[i] = reader.readLine();
 
             }
-            keystorePassword = passwords[0].toCharArray();
-            keyPassword = passwords[1].toCharArray();
+            keystorePassword = "testclient".toCharArray(); //undo this
+            keyPassword = "testkey".toCharArray();
 
         }
         catch (Exception e)
@@ -44,6 +45,10 @@ public class Server
             System.out.println("problem with I/O on ks passwords");
             e.printStackTrace();
         }
+        */
+
+        keystorePassword = "testclient".toCharArray(); //undo this
+        keyPassword = "testkey".toCharArray();
         KeyStore keystore;
         try
         {
@@ -52,17 +57,31 @@ public class Server
             keystore.load(new FileInputStream(keyStorePath), keystorePassword);
             KeyManagerFactory keyfact = KeyManagerFactory.getInstance("PKIX");
             keyfact.init(keystore, keyPassword);
+
             //trust manager
             TrustManagerFactory trstfact = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            trstfact.init(keystore);
             
             SSLContext context = SSLContext.getInstance(protocols[0]);
 
-            context.init(keyfact.getKeyManagers(), null, null); //TODO add trust manager
+            context.init(keyfact.getKeyManagers(), trstfact.getTrustManagers(), null);
             SSLServerSocketFactory ssf = context.getServerSocketFactory();
             SSLServerSocket s   = (SSLServerSocket) ssf.createServerSocket(PORT);
             while(running) //main loop to accept new clients and start threads
             {
                 SSLSocket client = (SSLSocket) s.accept();
+                //client.setEnabledProtocols(protocols);
+                //client.setEnabledCipherSuites(ciphers);
+
+                //test code to view enabled configs remove later
+                String[] temp = client.getEnabledCipherSuites();
+                String[] temp2 = client.getEnabledProtocols();
+                for(int i =0; i < temp.length; i++)
+                    System.out.println(temp[i]);
+                for(int i =0; i < temp2.length; i++)
+                    System.out.println(temp2[i]);
+                // end test code
+
                 ServerThread st = new ServerThread(client);
                 Thread t = new Thread(st);
                 t.start();
